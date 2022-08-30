@@ -2,6 +2,7 @@ package com.example.elasticsearch.controller;
 
 import com.example.elasticsearch.document.Vehicle;
 import com.example.elasticsearch.search.SearchRequestDto;
+import com.example.elasticsearch.service.VehicleDummyDataService;
 import com.example.elasticsearch.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,6 +17,7 @@ import java.util.List;
 public class VehicleController {
 
     private final VehicleService vehicleService;
+    private final VehicleDummyDataService vehicleDummyDataService;
 
     @PostMapping
     public void index(@RequestBody Vehicle vehicle) {
@@ -32,9 +34,21 @@ public class VehicleController {
         return vehicleService.search(searchRequestDto);
     }
 
-    @GetMapping("/createdSince/{date}")
+    @GetMapping("/created-since/{date}")
     public List<Vehicle> index(@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
         return vehicleService.getAllVehiclesCreatedSince(date);
+    }
+
+    @PostMapping("/search-created-since-with-request/{date}")
+    public List<Vehicle> searchCreatedSince(
+            @RequestBody final SearchRequestDto searchRequestDto,
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") final Date date) {
+        return vehicleService.searchCreatedSinceWithRequest(searchRequestDto, date);
+    }
+
+    @PostMapping("/insert-dummy-data")
+    public void insertDummyData() {
+        vehicleDummyDataService.insertDummyData();
     }
 
 }

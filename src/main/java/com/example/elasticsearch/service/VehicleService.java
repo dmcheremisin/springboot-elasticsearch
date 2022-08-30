@@ -92,4 +92,10 @@ public class VehicleService {
             return Collections.emptyList();
         }
     }
+
+    public List<Vehicle> searchCreatedSinceWithRequest(SearchRequestDto searchRequestDto, Date date) {
+        SearchRequest request = SearchUtil.buildSearchRequest(Indices.VEHICLE_INDEX, searchRequestDto, date);
+
+        return executeSearchRequest(request);
+    }
 }

@@ -5,10 +5,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.index.query.MultiMatchQueryBuilder;
-import org.elasticsearch.index.query.Operator;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.util.CollectionUtils;
@@ -24,6 +21,47 @@ public class SearchUtil {
         try {
             SearchSourceBuilder builder = new SearchSourceBuilder()
                     .postFilter(getQueryBuilder(searchRequestDto));
+
+            if (searchRequestDto.getSortBy() != null)
+                builder = builder.sort(
+                        searchRequestDto.getSortBy(),
+                        searchRequestDto.getSortOrder() != null ? searchRequestDto.getSortOrder() : SortOrder.ASC
+                );
+
+            SearchRequest request = new SearchRequest(indexName);
+            request.source(builder);
+
+            return request;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public static SearchRequest buildSearchRequest(String indexName, String field, Date date) {
+        try {
+            SearchSourceBuilder builder = new SearchSourceBuilder()
+                    .postFilter(getRangeQueryBuilder(field, date));
+
+            SearchRequest request = new SearchRequest(indexName);
+            request.source(builder);
+
+            return request;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public static SearchRequest buildSearchRequest(String indexName, SearchRequestDto searchRequestDto, Date date) {
+        try {
+            QueryBuilder searchQuery = getQueryBuilder(searchRequestDto);
+            QueryBuilder dateQuery = getRangeQueryBuilder("created", date);
+
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery().must(searchQuery).must(dateQuery);
+
+            SearchSourceBuilder builder = new SearchSourceBuilder()
+                    .postFilter(boolQuery);
 
             if (searchRequestDto.getSortBy() != null)
                 builder = builder.sort(
@@ -62,22 +100,8 @@ public class SearchUtil {
         return QueryBuilders.matchQuery(fields.get(0), searchRequestDto.getSearchTerm()).operator(Operator.AND);
     }
 
-    public static SearchRequest buildSearchRequest(String indexName, String field, Date date) {
-        try {
-            SearchSourceBuilder builder = new SearchSourceBuilder()
-                    .postFilter(getQueryBuilder(field, date));
 
-            SearchRequest request = new SearchRequest(indexName);
-            request.source(builder);
-
-            return request;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return null;
-        }
-    }
-
-    private static QueryBuilder getQueryBuilder(String field, Date date) {
+    private static QueryBuilder getRangeQueryBuilder(String field, Date date) {
         return QueryBuilders.rangeQuery(field).gte(date);
     }
 }

@@ -19,7 +19,13 @@ public class SearchUtil {
 
     public static SearchRequest buildSearchRequest(String indexName, SearchRequestDto searchRequestDto) {
         try {
+            int page = searchRequestDto.getPage();
+            int size = searchRequestDto.getSize();
+            int from = page <= 0 ? 0 : page * size;
+
             SearchSourceBuilder builder = new SearchSourceBuilder()
+                    .size(size)
+                    .from(from)
                     .postFilter(getQueryBuilder(searchRequestDto));
 
             if (searchRequestDto.getSortBy() != null)

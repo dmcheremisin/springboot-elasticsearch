@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class SearchRequestDto {
+public class SearchRequestDto extends PagedRequestDto {
 
     private String searchTerm;
 

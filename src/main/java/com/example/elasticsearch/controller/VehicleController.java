@@ -4,8 +4,10 @@ import com.example.elasticsearch.document.Vehicle;
 import com.example.elasticsearch.search.SearchRequestDto;
 import com.example.elasticsearch.service.VehicleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -28,6 +30,11 @@ public class VehicleController {
     @PostMapping("/search")
     public List<Vehicle> index(@RequestBody SearchRequestDto searchRequestDto) {
         return vehicleService.search(searchRequestDto);
+    }
+
+    @GetMapping("/createdSince/{date}")
+    public List<Vehicle> index(@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+        return vehicleService.getAllVehiclesCreatedSince(date);
     }
 
 }

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -67,7 +68,16 @@ public class VehicleService {
             log.error("Failed to build search request for: {}", searchRequestDto);
             return Collections.emptyList();
         }
+        return executeSearchRequest(searchRequest);
+    }
 
+
+    public List<Vehicle> getAllVehiclesCreatedSince(Date date) {
+        SearchRequest searchRequest = SearchUtil.buildSearchRequest(Indices.VEHICLE_INDEX, "created", date);
+        return executeSearchRequest(searchRequest);
+    }
+
+    private List<Vehicle> executeSearchRequest(SearchRequest searchRequest) {
         try {
             SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
 

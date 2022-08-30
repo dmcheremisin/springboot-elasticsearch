@@ -13,6 +13,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -59,5 +60,24 @@ public class SearchUtil {
         }
 
         return QueryBuilders.matchQuery(fields.get(0), searchRequestDto.getSearchTerm()).operator(Operator.AND);
+    }
+
+    public static SearchRequest buildSearchRequest(String indexName, String field, Date date) {
+        try {
+            SearchSourceBuilder builder = new SearchSourceBuilder()
+                    .postFilter(getQueryBuilder(field, date));
+
+            SearchRequest request = new SearchRequest(indexName);
+            request.source(builder);
+
+            return request;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private static QueryBuilder getQueryBuilder(String field, Date date) {
+        return QueryBuilders.rangeQuery(field).gte(date);
     }
 }
